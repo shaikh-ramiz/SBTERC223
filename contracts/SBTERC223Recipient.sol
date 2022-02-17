@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 interface ISBTERC223 {
     function transfer(
-        address to,
-        uint256 amount,
-        bytes calldata data
+        address _to,
+        uint256 _amount,
+        bytes calldata _data
     ) external returns (bool);
 }
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./IERC223.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ISBTERC223Recipient {
     function tokenReceived(
@@ -13,7 +14,7 @@ interface ISBTERC223Recipient {
     ) external;
 }
 
-contract SBTERC223 is IERC223, Context {
+contract SBTERC223 is IERC223, Context, Ownable {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
@@ -105,6 +106,7 @@ contract SBTERC223 is IERC223, Context {
     ) public returns (bool) {
         require(from != address(0), "ERC223: transfer from the zero address");
         require(to != address(0), "ERC223: transfer to the zero address");
+        require(amount > 0, "ERC223: transfer amount is less or zero");
         uint256 fromBalance = _balances[from];
         require(
             fromBalance >= amount,
@@ -123,5 +125,17 @@ contract SBTERC223 is IERC223, Context {
             emit TransferData(_data);
         }
         return true;
+    }
+
+    function mint(address account, uint256 amount)
+        public
+        onlyOwner
+        returns (bool)
+    {
+        require(account != address(0), "ERC223: minting to the zero address");
+        require(amount > 0, "ERC223: minting amount is less or zero");
+        _totalSupply += amount;
+        bool result = transfer(account, amount);
+        return result;
     }
 }

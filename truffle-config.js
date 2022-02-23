@@ -18,7 +18,9 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+const dotenv = require('dotenv');
+dotenv.config();
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
@@ -42,9 +44,13 @@ module.exports = {
     // options below to some value.
     //
     development: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: "*",       // Any network (default: none)
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Standard Ethereum port (default: none)
+      network_id: 5777,       // Any network (default: none)
+      gas: 6721975,
+      skipDryRun: true,
+      from: process.env.FOUNDER_WALLET,
+      websocket: true,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -57,14 +63,15 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    // ropsten: {
-    // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/YOUR-PROJECT-ID`),
-    // network_id: 3,       // Ropsten's id
-    // gas: 5500000,        // Ropsten has a lower block limit than mainnet
-    // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-    // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-    // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-    // },
+    kovan: {
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, `${process.env.KOVAN_ENDPOINT}${process.env.PROJECT_ID}`),
+      network_id: 42,       // Kovan's id
+      gas: 5500000,        // Kovan has a lower block limit than mainnet
+      // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true,     // Skip dry run before migrations? (default: false for public nets )
+      from: process.env.FOUNDER_WALLET,
+    },
     // Useful for private networks
     // private: {
     // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
@@ -84,11 +91,11 @@ module.exports = {
       version: "0.8.1",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
-       optimizer: {
-         enabled: false,
-         runs: 200
-       },
-       evmVersion: "byzantium"
+        optimizer: {
+          enabled: false,
+          runs: 200
+        },
+        evmVersion: "byzantium"
       }
     }
   },
@@ -104,13 +111,13 @@ module.exports = {
   // $ truffle migrate --reset --compile-all
   //
   // db: {
-    // enabled: false,
-    // host: "127.0.0.1",
-    // adapter: {
-    //   name: "sqlite",
-    //   settings: {
-    //     directory: ".db"
-    //   }
-    // }
+  // enabled: false,
+  // host: "127.0.0.1",
+  // adapter: {
+  //   name: "sqlite",
+  //   settings: {
+  //     directory: ".db"
+  //   }
+  // }
   // }
 };

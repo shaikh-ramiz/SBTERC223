@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./IERC223.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ISBTERC223Recipient {
     function tokenReceived(
@@ -13,7 +14,7 @@ interface ISBTERC223Recipient {
     ) external;
 }
 
-contract SBTERC223 is IERC223, Context {
+contract SBTERC223 is IERC223, Context, Ownable {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
@@ -21,16 +22,24 @@ contract SBTERC223 is IERC223, Context {
 
     mapping(address => uint256) private _balances;
 
-    constructor(
-        uint256 totalSupply_,
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) {
-        _name = name_;
-        _symbol = symbol_;
-        _decimals = decimals_;
-        _totalSupply = totalSupply_;
+    // constructor(
+    //     uint256 totalSupply_,
+    //     string memory name_,
+    //     string memory symbol_,
+    //     uint8 decimals_
+    // ) {
+    //     _name = name_;
+    //     _symbol = symbol_;
+    //     _decimals = decimals_;
+    //     _totalSupply = totalSupply_;
+    //     _balances[msg.sender] = _totalSupply;
+    // }
+
+    constructor() {
+        _name = "SBTERC223";
+        _symbol = "SBT";
+        _decimals = 18;
+        _totalSupply = 400000000;
         _balances[msg.sender] = _totalSupply;
     }
 
@@ -63,42 +72,41 @@ contract SBTERC223 is IERC223, Context {
         override
         returns (bool)
     {
-        // require(
-        //     Address.isContract(to),
-        //     "Token transfer to Contract Address are prohibited"
-        // );
+        bytes memory _empty = hex"00000000";
         address from = _msgSender();
-        require(from != address(0), "ERC223: transfer from the zero address");
-        require(to != address(0), "ERC223: transfer to the zero address");
-        uint256 fromBalance = _balances[from];
-        require(
-            fromBalance >= amount,
-            "ERC223: transfer amount exceeds balance"
-        );
-        unchecked {
-            _balances[from] = fromBalance - amount;
-        }
-        _balances[to] += amount;
-        if (Address.isContract(to)) {
-            bytes memory _empty = hex"00000000";
-            ISBTERC223Recipient(to).tokenReceived(from, amount, _empty);
-        }
-        emit Transfer(from, to, amount);
-        return true;
+        bool result = transferFrom(from, to, amount, _empty);
+        return result;
     }
 
     function transfer(
         address to,
         uint256 amount,
-        bytes calldata _data
+        bytes memory _data
     ) public override returns (bool) {
-        // require(
-        //     Address.isContract(to),
-        //     "Token transfer to Contract Address are prohibited"
-        // );
         address from = _msgSender();
+        bool result = transferFrom(from, to, amount, _data);
+        return result;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public returns (bool) {
+        bytes memory _empty = hex"00000000";
+        bool result = transferFrom(from, to, amount, _empty);
+        return result;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount,
+        bytes memory _data
+    ) public returns (bool) {
         require(from != address(0), "ERC223: transfer from the zero address");
         require(to != address(0), "ERC223: transfer to the zero address");
+        require(amount > 0, "ERC223: transfer amount is less or zero");
         uint256 fromBalance = _balances[from];
         require(
             fromBalance >= amount,
@@ -111,9 +119,23 @@ contract SBTERC223 is IERC223, Context {
         if (Address.isContract(to)) {
             ISBTERC223Recipient(to).tokenReceived(from, amount, _data);
         }
-
         emit Transfer(from, to, amount);
-        emit TransferData(_data);
+        bytes memory _empty = hex"00000000";
+        if (_data.length != _empty.length) {
+            emit TransferData(_data);
+        }
         return true;
+    }
+
+    function mint(address account, uint256 amount)
+        public
+        onlyOwner
+        returns (bool)
+    {
+        require(account != address(0), "ERC223: minting to the zero address");
+        require(amount > 0, "ERC223: minting amount is less or zero");
+        _totalSupply += amount;
+        bool result = transfer(account, amount);
+        return result;
     }
 }

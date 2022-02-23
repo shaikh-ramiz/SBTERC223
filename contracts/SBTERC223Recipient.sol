@@ -5,11 +5,11 @@ import "./IERC223Recipient.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-interface ISBTERC223 {
+interface IRSBTERC223 {
     function transfer(
-        address to,
-        uint256 amount,
-        bytes calldata data
+        address _to,
+        uint256 _amount,
+        bytes calldata _data
     ) external returns (bool);
 }
 
@@ -48,6 +48,10 @@ contract SBTERC223Recipient is IERC223Recipient, Ownable {
         uint256 _value,
         bytes memory _data
     ) external override {
+        require(
+            Address.isContract(msg.sender),
+            "Not an ERC223 Contract Address"
+        );
         ERC223TransferInfo memory tkn = _transferHistory[msg.sender][_from];
         tkn.data = _data;
         tkn.sender = _from;
@@ -67,18 +71,19 @@ contract SBTERC223Recipient is IERC223Recipient, Ownable {
 
         require(
             _contractAddress != address(0),
-            "ERC223: transfer from the zero address"
+            "ERC223Recipient: transfer from the zero address"
         );
         require(
             Address.isContract(_contractAddress),
             "Not an ERC223 Contract Address"
         );
-        require(_sender != address(0), "ERC223: transfer to the zero address");
+        require(_sender != address(0), "ERC223Recipient: transfer to the zero address");
+        require(amount > 0, "ERC223Recipient: transfer amount is less or zero");
         uint256 initBalance = _balances[_contractAddress];
         uint256 initBalanceSender = _balancesSender[_contractAddress][_sender];
         require(
             initBalance >= amount && initBalanceSender >= amount,
-            "ERC223: transfer amount exceeds balance"
+            "ERC223Recipient: transfer amount exceeds balance"
         );
         unchecked {
             _balances[_contractAddress] -= amount;
@@ -89,7 +94,7 @@ contract SBTERC223Recipient is IERC223Recipient, Ownable {
             tkn.value -= amount;
             _transferHistory[_contractAddress][_sender] = tkn;
         }
-        ISBTERC223(_contractAddress).transfer(_sender, amount, data);
+        IRSBTERC223(_contractAddress).transfer(_sender, amount, data);
         return true;
     }
 }

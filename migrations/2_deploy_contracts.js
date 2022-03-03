@@ -21,7 +21,8 @@ module.exports = async function (deployer) {
   await deployer.deploy(SBTERC223).then(async (instance) => {
     const token_contract_address = instance.address
     // const token_contract_address = "0xE69D991828dA1448105754fdf9F4cb868E0ab9B5"
-    await deployer.deploy(SBTERC223Vesting, moment().unix(), INVESTOR_ADDRESS, ADVISOR_ADDRESS, TEAM_ADDRESS, token_contract_address);
+    const timestamp = moment().unix()
+    await deployer.deploy(SBTERC223Vesting, timestamp, INVESTOR_ADDRESS, ADVISOR_ADDRESS, TEAM_ADDRESS, token_contract_address);
   });
   await deployer.deploy(SBTERC223Recipient)
 }

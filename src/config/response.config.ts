@@ -1,14 +1,10 @@
 import { Response } from "express";
 
 const getResponse = (res: Response, data: any) => {
-  if (data.success) {
-    res.statusCode = 200;
-    res.json(data.json);
-  } else {
-    res.sendStatus(500);
-    res.json(data.error);
-  }
-  return res;
+  res.statusCode = data.success ? 200 : 500;
+  return data.success
+    ? res.json(data.json)
+    : res.json(data.error.toString());
 };
 
 export default getResponse;

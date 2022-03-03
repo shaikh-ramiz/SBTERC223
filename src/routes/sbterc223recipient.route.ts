@@ -63,10 +63,12 @@ sbtERC223RecipientRouter.post(
   async (_req: Request, res: Response) => {
     try {
       const contractAddress = _req?.body?.contractAddress;
+      const sender = _req?.body?.sender;
       const amount = _req?.body?.amount;
       const transactionMetadata = _req?.body?.transactionMetadata;
       const result = await sbtERC223RecipientController.transfer(
         contractAddress,
+        sender,
         amount,
         transactionMetadata
       );

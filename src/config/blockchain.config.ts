@@ -10,6 +10,7 @@ const host = truffleConfig.networks.development.host;
 const port = truffleConfig.networks.development.port;
 const providerUrl = `http://${host}:${port}`;
 export const web3 = new Web3(providerUrl);
+export const gas = truffleConfig.networks.development.gas;
 
 let sbtERC223ContractInstance: any,
   sbtERC223RecipientContractInstance: any,

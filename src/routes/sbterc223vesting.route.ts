@@ -29,10 +29,13 @@ sbtERC223VestingRouter.get(
 );
 
 sbtERC223VestingRouter.get(
-  "/releasedTokens",
+  "/beneficiaryBalances",
   async (_req: Request, res: Response) => {
     try {
-      const result = await sbtERC223VestingController.released();
+      const beneficiary = _req?.body?.beneficiary;
+      const result = await sbtERC223VestingController.beneficiaryBalance(
+        beneficiary
+      );
       return getResponse(res, result);
     } catch (error) {
       return getResponse(res, { success: false, error: error });
@@ -41,7 +44,7 @@ sbtERC223VestingRouter.get(
 );
 
 sbtERC223VestingRouter.post(
-  "/releasedTokensForBeneficiary",
+  "/released",
   async (_req: Request, res: Response) => {
     try {
       const beneficiary = _req?.body?.beneficiary;
@@ -54,7 +57,7 @@ sbtERC223VestingRouter.post(
 );
 
 sbtERC223VestingRouter.post(
-  "/releaseTokensForBeneficiary",
+  "/release",
   async (_req: Request, res: Response) => {
     try {
       const beneficiary = _req?.body?.beneficiary;

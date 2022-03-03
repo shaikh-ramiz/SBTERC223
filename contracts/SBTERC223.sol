@@ -31,16 +31,14 @@ contract SBTERC223 is IERC223, Context, Ownable {
     //     _name = name_;
     //     _symbol = symbol_;
     //     _decimals = decimals_;
-    //     _totalSupply = totalSupply_;
-    //     _balances[msg.sender] = _totalSupply;
+    //     mint(msg.sender, totalSupply_);
     // }
 
     constructor() {
         _name = "SBTERC223";
         _symbol = "SBT";
         _decimals = 18;
-        _totalSupply = 400000000;
-        _balances[msg.sender] = _totalSupply;
+        mint(owner(), 400000000);
     }
 
     function standard() public pure override returns (string memory) {
@@ -74,8 +72,7 @@ contract SBTERC223 is IERC223, Context, Ownable {
     {
         bytes memory _empty = hex"00000000";
         address from = _msgSender();
-        bool result = transferFrom(from, to, amount, _empty);
-        return result;
+        return transferFrom(from, to, amount, _empty);
     }
 
     function transfer(
@@ -84,8 +81,7 @@ contract SBTERC223 is IERC223, Context, Ownable {
         bytes memory _data
     ) public override returns (bool) {
         address from = _msgSender();
-        bool result = transferFrom(from, to, amount, _data);
-        return result;
+        return transferFrom(from, to, amount, _data);
     }
 
     function transferFrom(
@@ -94,8 +90,7 @@ contract SBTERC223 is IERC223, Context, Ownable {
         uint256 amount
     ) public returns (bool) {
         bytes memory _empty = hex"00000000";
-        bool result = transferFrom(from, to, amount, _empty);
-        return result;
+        return transferFrom(from, to, amount, _empty);
     }
 
     function transferFrom(
@@ -135,7 +130,7 @@ contract SBTERC223 is IERC223, Context, Ownable {
         require(account != address(0), "ERC223: minting to the zero address");
         require(amount > 0, "ERC223: minting amount is less or zero");
         _totalSupply += amount;
-        bool result = transfer(account, amount);
-        return result;
+        _balances[account] += amount;
+        return true;
     }
 }

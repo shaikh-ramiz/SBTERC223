@@ -67,6 +67,7 @@ class SBTERC223RecipientController {
 
   async transfer(
     contractAddress: string,
+    sender: string,
     amount: number,
     transactionMetadata: string
   ) {
@@ -75,6 +76,7 @@ class SBTERC223RecipientController {
         await SBTERC223RecipientContractInstance();
       const response = await sbtERC223RecipientContractInstance.transfer(
         contractAddress,
+        sender,
         amount,
         transactionMetadata,
         {

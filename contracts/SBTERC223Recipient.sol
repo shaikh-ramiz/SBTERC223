@@ -64,11 +64,10 @@ contract SBTERC223Recipient is IERC223Recipient, Ownable {
 
     function transfer(
         address _contractAddress,
+        address _sender,
         uint256 amount,
         bytes calldata data
     ) public onlyOwner returns (bool) {
-        address _sender = _msgSender();
-
         require(
             _contractAddress != address(0),
             "ERC223Recipient: transfer from the zero address"
@@ -77,7 +76,10 @@ contract SBTERC223Recipient is IERC223Recipient, Ownable {
             Address.isContract(_contractAddress),
             "Not an ERC223 Contract Address"
         );
-        require(_sender != address(0), "ERC223Recipient: transfer to the zero address");
+        require(
+            _sender != address(0),
+            "ERC223Recipient: transfer to the zero address"
+        );
         require(amount > 0, "ERC223Recipient: transfer amount is less or zero");
         uint256 initBalance = _balances[_contractAddress];
         uint256 initBalanceSender = _balancesSender[_contractAddress][_sender];

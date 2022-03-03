@@ -35,7 +35,7 @@ class SBTERC223VestingController {
     }
   }
 
-  async released(beneficiary: string = null) {
+  async released(beneficiary: string) {
     try {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
@@ -63,16 +63,24 @@ class SBTERC223VestingController {
     try {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
+      const coinbase = await web3.eth.getCoinbase();
       const transaction =
-        await sbtERC223VestingContractInstance.getToken.sendTransaction(
+        await sbtERC223VestingContractInstance.release.sendTransaction(
           beneficiary,
           {
-            from: await web3.eth.getCoinbase(),
+            from: coinbase,
           }
         );
+      const balancesResult = await this.beneficiaryBalance(beneficiary);
       return {
         success: true,
-        json: { transaction: transaction.tx },
+        json: {
+          data: {
+            address: balancesResult?.json?.balances?.address,
+            balance: balancesResult?.json?.balances?.balance,
+            transactionHash: transaction.tx,
+          },
+        },
       };
     } catch (error) {
       return { success: false, error: error };
@@ -83,18 +91,15 @@ class SBTERC223VestingController {
     try {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
+      const coinbase = await web3.eth.getCoinbase();
       const createVestingScheduleTransaction =
         await sbtERC223VestingContractInstance.createVestingSchedule.sendTransaction(
           beneficiary,
           amount,
           {
-            from: await web3.eth.getCoinbase(),
+            from: coinbase,
           }
         );
-      await new SBTERC223Controller().transfer(
-        sbtERC223VestingContractInstance.address,
-        amount
-      );
       return {
         success: true,
         json: { transaction: createVestingScheduleTransaction?.tx },
@@ -108,17 +113,41 @@ class SBTERC223VestingController {
     try {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
+      const coinbase = await web3.eth.getCoinbase();
       const transaction =
         await sbtERC223VestingContractInstance.withdraw.sendTransaction(
           beneficiary,
           amount,
           {
-            from: await web3.eth.getCoinbase(),
+            from: coinbase,
           }
         );
       return {
         success: true,
         json: { transaction: transaction?.tx },
+      };
+    } catch (error) {
+      return { success: false, error: error };
+    }
+  }
+
+  async beneficiaryBalance(beneficiary: string) {
+    try {
+      const balanceResult = await new SBTERC223Controller().balanceOf(
+        beneficiary
+      );
+      const balances = balanceResult?.success
+        ? {
+            address: balanceResult?.json?.address,
+            balance: balanceResult?.json?.balance,
+          }
+        : {
+            address: beneficiary,
+            balance: "unknown",
+          };
+      return {
+        success: true,
+        json: { balances: balances },
       };
     } catch (error) {
       return { success: false, error: error };

@@ -1,3 +1,5 @@
+import BigNumber from "big-number";
+
 import {
   SBTERC223VestingContractInstance,
   web3,
@@ -39,21 +41,17 @@ class SBTERC223VestingController {
     try {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
-      if (beneficiary === null) {
-        const vestingTokensReleased =
-          await sbtERC223VestingContractInstance.released.call();
-        return {
-          success: true,
-          json: { vestingDuration: vestingTokensReleased?.toNumber() },
-        };
-      } else {
-        const vestingTokensReleased =
-          await sbtERC223VestingContractInstance.released.call(beneficiary);
-        return {
-          success: true,
-          json: { vestingDuration: vestingTokensReleased?.toNumber() },
-        };
-      }
+      const vestingTokensReleased =
+        await sbtERC223VestingContractInstance.released.call(beneficiary);
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
+      return {
+        success: true,
+        json: {
+          vestingDuration: vestingTokensReleased?.toNumber() / decimalValue,
+        },
+      };
     } catch (error) {
       return { success: false, error: error };
     }
@@ -92,6 +90,10 @@ class SBTERC223VestingController {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
       const coinbase = await web3.eth.getCoinbase();
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
+      amount = BigNumber(amount).multiply(BigNumber(10).power(decimalValue));
       const createVestingScheduleTransaction =
         await sbtERC223VestingContractInstance.createVestingSchedule.sendTransaction(
           beneficiary,
@@ -114,6 +116,10 @@ class SBTERC223VestingController {
       const sbtERC223VestingContractInstance =
         await SBTERC223VestingContractInstance();
       const coinbase = await web3.eth.getCoinbase();
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
+      amount = BigNumber(amount).multiply(BigNumber(10).power(decimalValue));
       const transaction =
         await sbtERC223VestingContractInstance.withdraw.sendTransaction(
           beneficiary,

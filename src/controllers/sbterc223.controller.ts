@@ -1,3 +1,5 @@
+import BigNumber from "big-number";
+
 import { SBTERC223ContractInstance, web3 } from "../config/blockchain.config";
 
 class SBTERC223Controller {
@@ -34,8 +36,8 @@ class SBTERC223Controller {
   async decimals() {
     try {
       const sbtERC223ContractInstance = await SBTERC223ContractInstance();
-      const tokenSymbol = await sbtERC223ContractInstance.decimals.call();
-      return { success: true, json: { decimals: tokenSymbol } };
+      const decimals = await sbtERC223ContractInstance.decimals.call();
+      return { success: true, json: { decimals: decimals.toNumber() } };
     } catch (error) {
       return { success: false, error: error };
     }
@@ -46,9 +48,12 @@ class SBTERC223Controller {
       const sbtERC223ContractInstance = await SBTERC223ContractInstance();
       const tokenTotalSupply =
         await sbtERC223ContractInstance.totalSupply.call();
+      const decimalValue = (await this.decimals())?.json?.decimals;
       return {
         success: true,
-        json: { totalSupply: tokenTotalSupply?.toNumber() },
+        json: {
+          totalSupply: tokenTotalSupply?.toNumber() / decimalValue,
+        },
       };
     } catch (error) {
       return { success: false, error: error };
@@ -61,9 +66,14 @@ class SBTERC223Controller {
       const tokenBalance = await sbtERC223ContractInstance.balanceOf.call(
         accountAddress
       );
+      const decimalValue = (await this.decimals())?.json?.decimals;
+      const tokenBalanceNum = tokenBalance?.toNumber();
       return {
         success: true,
-        json: { address: accountAddress, balance: tokenBalance?.toNumber() },
+        json: {
+          address: accountAddress,
+          balance: tokenBalanceNum / decimalValue,
+        },
       };
     } catch (error) {
       return { success: false, error: error };
@@ -78,6 +88,10 @@ class SBTERC223Controller {
     try {
       const sbtERC223ContractInstance = await SBTERC223ContractInstance();
       const coinbase = await web3.eth.getCoinbase();
+      const decimalValue = (await this.decimals())?.json?.decimals;
+      tokenAmount = BigNumber(tokenAmount).multiply(
+        BigNumber(10).power(decimalValue)
+      );
       if (data?.length === 0 || data === null || data === undefined) {
         const response = await sbtERC223ContractInstance.methods[
           "transfer(address,uint256)"
@@ -122,6 +136,10 @@ class SBTERC223Controller {
     try {
       const sbtERC223ContractInstance = await SBTERC223ContractInstance();
       const coinbase = await web3.eth.getCoinbase();
+      const decimalValue = (await this.decimals())?.json?.decimals;
+      tokenAmount = BigNumber(tokenAmount).multiply(
+        BigNumber(10).power(decimalValue)
+      );
       if (data?.length === 0 || data === null || data === typeof undefined) {
         const response = await sbtERC223ContractInstance.methods[
           "transferFrom(address,address,uint256)"

@@ -5,7 +5,7 @@
 <li>SERVER_PORT</li>
 <li>KOVAN_ENDPOINT</li>
 <li>PROJECT_ID</li>
-<li>PROJECT_SECRET</li>
+<li>PRIVATE_KEY</li>
 <li>MNEMONIC</li>
 <li>FOUNDER_WALLET</li>
 <li>INVESTOR_ADDRESS</li>

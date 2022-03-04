@@ -62,9 +62,9 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     kovan: {
-      provider: () => new HDWalletProvider(process.env.MNEMONIC, `${process.env.KOVAN_ENDPOINT}${process.env.PROJECT_ID}`),
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, `${process.env.KOVAN_ENDPOINT}${process.env.PROJECT_ID}`),
       network_id: 42,       // Kovan's id
-      gas: 5500000,        // Kovan has a lower block limit than mainnet
+      gas: 30000000,        // Kovan has a lower block limit than mainnet
       // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
       // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true,     // Skip dry run before migrations? (default: false for public nets )

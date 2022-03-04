@@ -1,7 +1,10 @@
+import BigNumber from "big-number";
+
 import {
   SBTERC223RecipientContractInstance,
   web3,
 } from "../config/blockchain.config";
+import SBTERC223Controller from "./sbterc223.controller";
 
 class SBTERC223RecipientController {
   async tokenBalance(contractAddress: string) {
@@ -12,9 +15,15 @@ class SBTERC223RecipientController {
         await sbtERC223RecipientContractInstance.tokenBalance.call(
           contractAddress
         );
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
       return {
         success: true,
-        json: { address: contractAddress, balance: tokenBalance?.toNumber() },
+        json: {
+          address: contractAddress,
+          balance: tokenBalance?.toNumber() / decimalValue,
+        },
       };
     } catch (error) {
       return { success: false, error: error };
@@ -30,12 +39,15 @@ class SBTERC223RecipientController {
           contractAddress,
           sender
         );
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
       return {
         success: true,
         json: {
           contractAddress: contractAddress,
           senderAddress: sender,
-          balance: tokenBalanceSender?.toNumber(),
+          balance: tokenBalanceSender?.toNumber() / decimalValue,
         },
       };
     } catch (error) {
@@ -74,6 +86,10 @@ class SBTERC223RecipientController {
     try {
       const sbtERC223RecipientContractInstance =
         await SBTERC223RecipientContractInstance();
+      const decimalValue = (
+        await new SBTERC223Controller().decimals()
+      )?.json?.decimals;
+      amount = BigNumber(amount).multiply(BigNumber(10).power(decimalValue));
       const response = await sbtERC223RecipientContractInstance.transfer(
         contractAddress,
         sender,

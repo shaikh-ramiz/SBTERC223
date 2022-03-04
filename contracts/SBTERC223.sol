@@ -22,24 +22,24 @@ contract SBTERC223 is IERC223, Context, Ownable {
 
     mapping(address => uint256) private _balances;
 
-    // constructor(
-    //     uint256 totalSupply_,
-    //     string memory name_,
-    //     string memory symbol_,
-    //     uint8 decimals_
-    // ) {
-    //     _name = name_;
-    //     _symbol = symbol_;
-    //     _decimals = decimals_;
-    //     mint(msg.sender, totalSupply_);
-    // }
-
-    constructor() {
-        _name = "SBTERC223";
-        _symbol = "SBT";
-        _decimals = 18;
-        mint(owner(), 400000000);
+    constructor(
+        uint256 totalSupply_,
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) {
+        _name = name_;
+        _symbol = symbol_;
+        _decimals = decimals_;
+        mint(msg.sender, totalSupply_);
     }
+
+    // constructor() {
+    //     _name = "SBTERC223";
+    //     _symbol = "SBT";
+    //     _decimals = 18;
+    //     mint(owner(), 400000000);
+    // }
 
     function standard() public pure override returns (string memory) {
         return "erc223";

@@ -1,5 +1,8 @@
+import { config } from "dotenv";
 import Web3 from "web3";
 import contract from "truffle-contract";
+
+config();
 
 import truffleConfig from "../../truffle-config.js";
 import SBTERC223 from "../../build/contracts/SBTERC223.json";
@@ -8,9 +11,18 @@ import SBTERC223Vesting from "../../build/contracts/SBTERC223Vesting.json";
 
 const host = truffleConfig.networks.development.host;
 const port = truffleConfig.networks.development.port;
-const providerUrl = `http://${host}:${port}`;
+
+const providerUrl =
+  process.env.SETUP === "development"
+    ? `http://${host}:${port}`
+    : truffleConfig.networks.kovan.provider();
+
 export const web3 = new Web3(providerUrl);
-export const gas = truffleConfig.networks.development.gas;
+
+export const gas =
+  process.env.SETUP === "development"
+    ? truffleConfig.networks.development.gas
+    : truffleConfig.networks.kovan.gas;
 
 let sbtERC223ContractInstance: any,
   sbtERC223RecipientContractInstance: any,

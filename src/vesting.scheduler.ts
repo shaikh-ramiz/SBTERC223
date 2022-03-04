@@ -25,7 +25,7 @@ const beneficiaryTokens = [
 
 const dateTimeFormat = "MMMM Do YYYY, h:mm:ss a";
 
-const release = async (counter: number = 0, allReleased = false) => {
+const release = async (counter: number = 0, allReleased: Boolean = false) => {
   const benficiaries = [
     process.env.INVESTOR_ADDRESS,
     process.env.ADVISOR_ADDRESS,
@@ -36,18 +36,9 @@ const release = async (counter: number = 0, allReleased = false) => {
   const contractBalanceResult = await sbtERC223Controller.balanceOf(
     process.env.VESTING_CONTRACT
   );
-  allReleased = contractBalanceResult?.success
-    ? contractBalanceResult?.json?.balance <= 0
-      ? true
-      : false
-    : false;
 
   // Looping call for release of tokens for beneficiary
   for (let index = 0; index <= counter; index++) {
-    if (allReleased) {
-      exit();
-    }
-    
     const beneficiary = benficiaries[index];
     // Checking balance of beneficiary before tokens released
     const balanceResult = await sbtERC223Controller.balanceOf(beneficiary);
@@ -63,13 +54,13 @@ const release = async (counter: number = 0, allReleased = false) => {
       : console.error(`balanceOf:`, balanceResult?.error);
 
     // Calling release of tokens for beneficiary
-    const result = await sbtERC223VestingController.release(beneficiary);
-    result?.success
-      ? console.info(
-          `${moment().format(dateTimeFormat)} - Result: `,
-          result?.json?.data
-        )
-      : console.error(`releaseTokens:`, result?.error);
+    // const result = await sbtERC223VestingController.release(beneficiary);
+    // result?.success
+    //   ? console.info(
+    //       `${moment().format(dateTimeFormat)} - Result: `,
+    //       result?.json?.data
+    //     )
+    //   : console.error(`releaseTokens:`, result?.error);
 
     // Checking balance of beneficiary after tokens released
     const balanceResultAfter = await sbtERC223Controller.balanceOf(beneficiary);
@@ -85,9 +76,17 @@ const release = async (counter: number = 0, allReleased = false) => {
       : console.error(`balanceOf:`, balanceResultAfter?.error);
   }
 
+  allReleased = contractBalanceResult?.success
+    ? contractBalanceResult?.json?.balance <= 0
+      ? true
+      : false
+    : false;
+
   // Recurring Function Logic
   if (counter <= benficiaries.length - 1) {
-    if (allReleased && counter === benficiaries.length) {
+    if (allReleased) {
+      exit();
+    } else if (allReleased && counter === benficiaries.length) {
       console.info(`All Tokens Released`);
     } else {
       counter = counter === benficiaries.length - 1 ? 0 : counter + 1;
@@ -100,29 +99,14 @@ const release = async (counter: number = 0, allReleased = false) => {
 };
 
 const main = async () => {
-  // Creating vesting schedule for all beneficiaries
-  for (let index = 0; index < benficiaries.length; index++) {
-    const beneficiary = benficiaries[index];
-    const tokenSupply = beneficiaryTokens[index];
-    const result = await sbtERC223VestingController.createVestingSchedule(
-      beneficiary,
-      tokenSupply
-    );
-    result?.success
-      ? console.info(
-          `${moment().format(
-            dateTimeFormat
-          )} - Schedule Created BENEFICIARY_${index}: ${beneficiary}, Tx Hash:`,
-          result?.json?.transaction
-        )
-      : console.error(`createSchedule:`, result?.error);
-  }
-
   // Calling recurring release function after 3 minutes
-  setTimeout(release, 180000);
+  release(0);
+  // setTimeout(release, 180000);
 };
 
 main().catch((error) => {
-  console.error(`Main:`, error);
+  console.error(error);
   process.exitCode = 1;
 });
+
+export default main;
